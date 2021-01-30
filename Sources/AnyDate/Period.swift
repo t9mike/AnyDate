@@ -90,7 +90,7 @@ public struct Period {
 
         let days = day + dayAppend
 
-        var newDate = LocalDate(year: year, month: month + 1, day: days + 1)
+        let newDate = LocalDate(year: year, month: month + 1, day: days + 1)
         self.internalYear = newDate.year
         self.internalMonth = newDate.month - 1
         self.internalDay = newDate.day - 1

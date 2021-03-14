@@ -176,22 +176,26 @@ public struct ZonedDateTime {
     ///
     /// - Parameters timeZone: The time zone information.
     public func toDate(timeZone: TimeZone? = nil) -> Date {
-        /// Specify date components
-        var dateComponents = DateComponents()
-        dateComponents.timeZone = self.internalClock.toTimeZone()
-        dateComponents.year = self.internalDateTime.year
-        dateComponents.month = self.internalDateTime.month
-        dateComponents.day = self.internalDateTime.day
-        dateComponents.hour = self.internalDateTime.hour
-        dateComponents.minute = self.internalDateTime.minute
-        dateComponents.second = self.internalDateTime.second
-        dateComponents.nanosecond = self.internalDateTime.nano
         
-        /// Create date from components
-        var calendar = Calendar.current
-        calendar.timeZone = timeZone ?? self.internalClock.toTimeZone()
-        
-        return calendar.date(from: dateComponents)!
+        return autoreleasepool
+        {
+            /// Specify date components
+            var dateComponents = DateComponents()
+            dateComponents.timeZone = self.internalClock.toTimeZone()
+            dateComponents.year = self.internalDateTime.year
+            dateComponents.month = self.internalDateTime.month
+            dateComponents.day = self.internalDateTime.day
+            dateComponents.hour = self.internalDateTime.hour
+            dateComponents.minute = self.internalDateTime.minute
+            dateComponents.second = self.internalDateTime.second
+            dateComponents.nanosecond = self.internalDateTime.nano
+            
+            /// Create date from components
+            var calendar = Calendar.current
+            calendar.timeZone = timeZone ?? self.internalClock.toTimeZone()
+            
+            return calendar.date(from: dateComponents)!
+        }
     }
 
     /// Returns a copy of this date-time with a different time-zone,

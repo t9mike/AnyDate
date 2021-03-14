@@ -218,22 +218,26 @@ public struct LocalDateTime {
     ///
     /// - Parameters timeZone: The time zone information.
     public func toDate(timeZone: TimeZone = TimeZone.current) -> Date {
-        /// Specify date components
-        var dateComponents = DateComponents()
-        dateComponents.timeZone = timeZone
-        dateComponents.year = self.internalDate.year
-        dateComponents.month = self.internalDate.month
-        dateComponents.day = self.internalDate.day
-        dateComponents.hour = self.internalTime.hour
-        dateComponents.minute = self.internalTime.minute
-        dateComponents.second = self.internalTime.second
-        dateComponents.nanosecond = self.internalTime.nano
         
-        /// Create date from components
-        var calendar = Calendar.current
-        calendar.timeZone = timeZone
+        return autoreleasepool
+        {
+            /// Specify date components
+            var dateComponents = DateComponents()
+            dateComponents.timeZone = timeZone
+            dateComponents.year = self.internalDate.year
+            dateComponents.month = self.internalDate.month
+            dateComponents.day = self.internalDate.day
+            dateComponents.hour = self.internalTime.hour
+            dateComponents.minute = self.internalTime.minute
+            dateComponents.second = self.internalTime.second
+            dateComponents.nanosecond = self.internalTime.nano
+            
+            /// Create date from components
+            var calendar = Calendar.current
+            calendar.timeZone = timeZone
 
-        return calendar.date(from: dateComponents)!
+            return calendar.date(from: dateComponents)!
+        }
     }
     
     /// Returns a copy of this date-time with the specified field set to a new value.
@@ -681,19 +685,39 @@ public struct LocalDateTime {
 
     /// Creates a local date-time from an instance of Date.
     public init(_ date: Date, timeZone: TimeZone = TimeZone.current) {
-        var calendar = Calendar.current
-        calendar.timeZone = timeZone
+        
+        var year = 0
+        var month = 0
+        var day = 0
+        var hour = 0
+        var minute = 0
+        var second = 0
+        var nanoOfSecond = 0
+
+        autoreleasepool
+        {
+            var calendar = Calendar.current
+            calendar.timeZone = timeZone
+            
+            year = calendar.component(.year, from: date)
+            month = calendar.component(.month, from: date)
+            day = calendar.component(.day, from: date)
+            hour = calendar.component(.hour, from: date)
+            minute = calendar.component(.minute, from: date)
+            second = calendar.component(.second, from: date)
+            nanoOfSecond = calendar.component(.nanosecond, from: date)
+        }
         
         self.internalDate = LocalDate(
-            year: calendar.component(.year, from: date),
-            month: calendar.component(.month, from: date),
-            day: calendar.component(.day, from: date)
+            year: year,
+            month: month,
+            day: day
         )
         self.internalTime = LocalTime(
-            hour: calendar.component(.hour, from: date),
-            minute: calendar.component(.minute, from: date),
-            second: calendar.component(.second, from: date),
-            nanoOfSecond: calendar.component(.nanosecond, from: date)
+            hour: hour,
+            minute: minute,
+            second: second,
+            nanoOfSecond: nanoOfSecond
         )
         self.normalize()
     }

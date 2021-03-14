@@ -277,19 +277,23 @@ public struct LocalTime {
     ///
     /// - Parameters timeZone: The time zone information.
     public func toDate(timeZone: TimeZone = TimeZone.current) -> Date {
-        /// Specify date components
-        var dateComponents = DateComponents()
-        dateComponents.timeZone = timeZone
-        dateComponents.hour = self.internalHour
-        dateComponents.minute = self.internalMinute
-        dateComponents.second = self.internalSecond
-        dateComponents.nanosecond = Int(self.internalNano)
         
-        /// Create date from components
-        var calendar = Calendar.current
-        calendar.timeZone = timeZone
-        
-        return calendar.date(from: dateComponents)!
+        return autoreleasepool
+        {
+            /// Specify date components
+            var dateComponents = DateComponents()
+            dateComponents.timeZone = timeZone
+            dateComponents.hour = self.internalHour
+            dateComponents.minute = self.internalMinute
+            dateComponents.second = self.internalSecond
+            dateComponents.nanosecond = Int(self.internalNano)
+            
+            /// Create date from components
+            var calendar = Calendar.current
+            calendar.timeZone = timeZone
+            
+            return calendar.date(from: dateComponents)!
+        }
     }
     
     /// Returns a copy of this time with the specified field set to a new value.
@@ -560,13 +564,27 @@ public struct LocalTime {
     public init(timeZone: TimeZone = TimeZone.current) {
         let now = Date()
         
-        var calendar = Calendar.current
-        calendar.timeZone = timeZone
+        var internalHour = 0
+        var internalMinute = 0
+        var internalSecond = 0
+        var internalNano: Int64 = 0
+
+        autoreleasepool
+        {
+            var calendar = Calendar.current
+            calendar.timeZone = timeZone
+            
+            internalHour = calendar.component(.hour, from: now)
+            internalMinute = calendar.component(.minute, from: now)
+            internalSecond = calendar.component(.second, from: now)
+            internalNano = Int64(calendar.component(.nanosecond, from: now))
+
+        }
         
-        self.internalHour = calendar.component(.hour, from: now)
-        self.internalMinute = calendar.component(.minute, from: now)
-        self.internalSecond = calendar.component(.second, from: now)
-        self.internalNano = Int64(calendar.component(.nanosecond, from: now))
+        self.internalHour = internalHour
+        self.internalMinute = internalMinute
+        self.internalSecond = internalSecond
+        self.internalNano = internalNano
         self.normalize()
     }
     
@@ -577,13 +595,27 @@ public struct LocalTime {
 
     /// Creates a local time from an instance of Date.
     public init(_ date: Date, timeZone: TimeZone = TimeZone.current) {
-        var calendar = Calendar.current
-        calendar.timeZone = timeZone
+
+        var internalHour = 0
+        var internalMinute = 0
+        var internalSecond = 0
+        var internalNano: Int64 = 0
         
-        self.internalHour = calendar.component(.hour, from: date)
-        self.internalMinute = calendar.component(.minute, from: date)
-        self.internalSecond = calendar.component(.second, from: date)
-        self.internalNano = Int64(calendar.component(.nanosecond, from: date))
+        autoreleasepool
+        {
+            var calendar = Calendar.current
+            calendar.timeZone = timeZone
+
+            internalHour = calendar.component(.hour, from: date)
+            internalMinute = calendar.component(.minute, from: date)
+            internalSecond = calendar.component(.second, from: date)
+            internalNano = Int64(calendar.component(.nanosecond, from: date))
+        }
+        
+        self.internalHour = internalHour
+        self.internalMinute = internalMinute
+        self.internalSecond = internalSecond
+        self.internalNano = internalNano
         self.normalize()
     }
     

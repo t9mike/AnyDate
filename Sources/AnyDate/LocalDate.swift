@@ -306,18 +306,22 @@ public struct LocalDate {
     ///
     /// - Parameters timeZone: The time zone information.
     public func toDate(timeZone: TimeZone = TimeZone.current) -> Date {
-        /// Specify date components
-        var dateComponents = DateComponents()
-        dateComponents.timeZone = timeZone
-        dateComponents.year = self.internalYear
-        dateComponents.month = self.internalMonth
-        dateComponents.day = self.internalDay
         
-        /// Create date from components
-        var calendar = Calendar.current
-        calendar.timeZone = timeZone
-        
-        return calendar.date(from: dateComponents)!
+        return autoreleasepool
+        {
+            /// Specify date components
+            var dateComponents = DateComponents()
+            dateComponents.timeZone = timeZone
+            dateComponents.year = self.internalYear
+            dateComponents.month = self.internalMonth
+            dateComponents.day = self.internalDay
+            
+            /// Create date from components
+            var calendar = Calendar.current
+            calendar.timeZone = timeZone
+
+            return calendar.date(from: dateComponents)!
+        }
     }
     
     /// Returns a copy of this date with the specified field set to a new value.
@@ -590,14 +594,26 @@ public struct LocalDate {
 
     /// Creates the current date from the time-zone.
     public init(timeZone: TimeZone = TimeZone.current) {
+        
         let now = Date()
+
+        var internalYear = 0
+        var internalMonth = 0
+        var internalDay = 0
         
-        var calendar = Calendar.current
-        calendar.timeZone = timeZone
+        autoreleasepool
+        {
+            var calendar = Calendar.current
+            calendar.timeZone = timeZone
+            
+            internalYear = calendar.component(.year, from: now)
+            internalMonth = calendar.component(.month, from: now)
+            internalDay = calendar.component(.day, from: now)
+        }
         
-        self.internalYear = calendar.component(.year, from: now)
-        self.internalMonth = calendar.component(.month, from: now)
-        self.internalDay = calendar.component(.day, from: now)
+        self.internalYear = internalYear
+        self.internalMonth = internalMonth
+        self.internalDay = internalDay
         self.normalize()
     }
     
@@ -608,12 +624,24 @@ public struct LocalDate {
 
     /// Creates a local date from an instance of Date.
     public init(_ date: Date, timeZone: TimeZone = TimeZone.current) {
-        var calendar = Calendar.current
-        calendar.timeZone = timeZone
         
-        self.internalYear = calendar.component(.year, from: date)
-        self.internalMonth = calendar.component(.month, from: date)
-        self.internalDay = calendar.component(.day, from: date)
+        var internalYear = 0
+        var internalMonth = 0
+        var internalDay = 0
+        
+        autoreleasepool
+        {
+            var calendar = Calendar.current
+            calendar.timeZone = timeZone
+            
+            internalYear = calendar.component(.year, from: date)
+            internalMonth = calendar.component(.month, from: date)
+            internalDay = calendar.component(.day, from: date)
+        }
+        
+        self.internalYear = internalYear
+        self.internalMonth = internalMonth
+        self.internalDay = internalDay
         self.normalize()
     }
     
